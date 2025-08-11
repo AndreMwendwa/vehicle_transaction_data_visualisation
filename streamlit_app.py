@@ -29,6 +29,11 @@ maps = [
         "title": "Zoning 1, Zoning 2 and Original Postal Codes",
         "file": os.path.join(base_folder, "canada_zones_toggle.html"),
         "text": "Map the two zoning systems considered, in addition to the base postal codes from which they are derived."
+    },
+    {
+        "title": "Charging Station Accessibility",
+        "file": os.path.join(base_folder, "charging_station_accessibility.html"),
+        "text": "Map showing the accessibility of charging stations across different regions."
     }
 ]
 
