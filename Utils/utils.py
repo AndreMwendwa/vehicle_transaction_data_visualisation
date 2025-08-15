@@ -1,3 +1,5 @@
+import pandas as pd
+
 def get_years(start_col, end_col):
     min_start = start_col.min()
     max_end = end_col.max()
@@ -11,18 +13,20 @@ def replace_semicolon_with_linebreak(input_dataframe):
             input_dataframe[col] = input_dataframe[col].replace(';', '<br>', regex=True)
     return input_dataframe
 
-def make_html_table_from_dataframe(input_dataframe):
+def make_html_table_from_dataframe(input_dataframe, link_columns):
     '''Make an html table from a dataframe'''
-    # if len(input_dataframe.columns) > 3:
-    #     input_dataframe = wrap_dataframe_column_values(
-    #         replace_semicolon_with_linebreak(input_dataframe))
-    # else:
-    #     input_dataframe = replace_semicolon_with_linebreak(input_dataframe)
     input_dataframe = replace_semicolon_with_linebreak(input_dataframe)
-    # # We name the axis and reset the index so that it appears in the table as a column
+
+    # Convert "Eligible vehicles" and "Source" columns to HTML links if they exist
+    for col in link_columns:
+        if col in input_dataframe.columns:
+            input_dataframe[col] = input_dataframe[col].apply(
+                lambda x: f'<a href="{x}" target="_blank">{x}</a>' if pd.notna(x) and str(x).startswith(('http://', 'https://')) else x
+            )
+
     input_dataframe.index.name = ''
     input_dataframe.reset_index(inplace=True)
-    # input_dataframe = input_dataframe.to_html(index=False, escape=False)
+
     output = f"""
     <html>
     <head>
@@ -39,6 +43,7 @@ def make_html_table_from_dataframe(input_dataframe):
     </body>
     </html>
     """
+    return output
     return output
 
 
