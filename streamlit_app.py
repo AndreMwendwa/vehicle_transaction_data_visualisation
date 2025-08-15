@@ -4,6 +4,18 @@ import os
 from Utils.utils import get_years, make_html_table_from_dataframe, replace_semicolon_with_linebreak, get_all_column_values
 import pandas as pd
 
+# ---- Lazy-load helpers ----
+@st.cache_data(show_spinner=False)
+def _read_html_once(path, mtime):
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+@st.cache_data(show_spinner=False)
+def _load_incentives_html_once(xlsx_path, sheet_name, mtime):
+    df = pd.read_excel(xlsx_path, sheet_name=sheet_name)
+    # keep your existing HTML builder (now with link columns)
+    return make_html_table_from_dataframe(df, link_columns=["Eligible vehicles", "Source"])
+
 def maps():
     st.set_page_config(page_title="Transaction Numbers Map", layout="wide")
     st.title("From Coast to Coast: Understanding and Predicting BEV Adoption Across Canadian Regions - Supplementary Material")
@@ -47,23 +59,26 @@ def maps():
             if not os.path.exists(m["file"]):
                 st.error(f"Could not find `{m['file']}`. Make sure it's in the correct folder.")
             else:
-                with open(m["file"], "r", encoding="utf-8") as f:
-                    map_html = f.read()
+                # Lazy-load only when the expander is opened; cache thereafter
+                mtime = os.path.getmtime(m["file"])
+                map_html = _read_html_once(m["file"], mtime)
                 components.html(map_html, height=700, scrolling=True)
 
 def tables():
     st.title("EV Adoption Incentives")
     st.write("Data on EV adoption incentives across different provinces.")
-    with st.expander("Summary of Incentives Data", expanded=True):
-        # Load the incentives data
-        incentives_data = pd.read_excel("EV_incentives_sum_edited.xlsx", sheet_name='EV_incentives_sum')
-        
-        incentives_data_html = make_html_table_from_dataframe(incentives_data)
-        
-        # Display the HTML table
-        st.markdown(incentives_data_html, unsafe_allow_html=True)
+    with st.expander("Summary of Incentives Data", expanded=False):
+        # Load the incentives data only when opened; cache thereafter
+        xlsx_path = "EV_incentives_sum_edited.xlsx"
+        sheet = "EV_incentives_sum"
+        if not os.path.exists(xlsx_path):
+            st.error(f"Could not find `{xlsx_path}`. Make sure it's in the correct folder.")
+        else:
+            mtime = os.path.getmtime(xlsx_path)
+            incentives_data_html = _load_incentives_html_once(xlsx_path, sheet, mtime)
+            # Display the HTML table
+            st.markdown(incentives_data_html, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     tables()
     maps()
-    
