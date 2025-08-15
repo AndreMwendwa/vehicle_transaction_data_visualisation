@@ -13,12 +13,14 @@ def _read_html_once(path, mtime):
 @st.cache_data(show_spinner=False)
 def _load_incentives_html_once(xlsx_path, sheet_name, mtime):
     df = pd.read_excel(xlsx_path, sheet_name=sheet_name)
+    # Fill na with row above
+    df.fillna(method='ffill', inplace=True)
     # keep your existing HTML builder (now with link columns)
     return make_html_table_from_dataframe(df, link_columns=["Eligible vehicles", "Source"])
 
 def maps():
     st.set_page_config(page_title="Transaction Numbers Map", layout="wide")
-    st.title("From Coast to Coast: Understanding and Predicting BEV Adoption Across Canadian Regions - Supplementary Material")
+    st.title("Maps")
 
     # Base folder where your maps live
     base_folder = "transaction_numbers_fsa_map"
