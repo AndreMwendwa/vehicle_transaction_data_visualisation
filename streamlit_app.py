@@ -64,6 +64,12 @@ def maps():
                 map_html = _read_html_once(m["file"], mtime)
                 components.html(map_html, height=700, scrolling=True)
 
+def display_table(xlsx_path, sheet):
+    mtime = os.path.getmtime(xlsx_path)
+    incentives_data_html = _load_incentives_html_once(xlsx_path, sheet, mtime)
+    # Display the HTML table
+    st.markdown(incentives_data_html, unsafe_allow_html=True)
+
 def tables():
     st.title("EV Adoption Incentives")
     st.write("Data on EV adoption incentives across different provinces.")
@@ -74,10 +80,43 @@ def tables():
         if not os.path.exists(xlsx_path):
             st.error(f"Could not find `{xlsx_path}`. Make sure it's in the correct folder.")
         else:
-            mtime = os.path.getmtime(xlsx_path)
-            incentives_data_html = _load_incentives_html_once(xlsx_path, sheet, mtime)
-            # Display the HTML table
-            st.markdown(incentives_data_html, unsafe_allow_html=True)
+            display_table(xlsx_path, sheet)
+
+    with st.expander("iZEV program details", expanded=False):
+        # Load the iZEV program data only when opened; cache thereafter
+        xlsx_path = "EV_incentives_sum_edited.xlsx"
+        sheet = "iZEV"
+        if not os.path.exists(xlsx_path):
+            st.error(f"Could not find `{xlsx_path}`. Make sure it's in the correct folder.")
+        else:
+            display_table(xlsx_path, sheet)
+
+    with st.expander("British Columbia Subsidies", expanded=False):
+        # Load the British Columbia Subsidies data only when opened; cache thereafter
+        xlsx_path = "EV_incentives_sum_edited.xlsx"
+        sheet = "BC"
+        if not os.path.exists(xlsx_path):
+            st.error(f"Could not find `{xlsx_path}`. Make sure it's in the correct folder.")
+        else:
+            display_table(xlsx_path, sheet)
+
+    with st.expander("Quebec Subsidies (New Vehicles)", expanded=False):
+        # Load the Quebec Subsidies data only when opened; cache thereafter
+        xlsx_path = "EV_incentives_sum_edited.xlsx"
+        sheet = "QC_new"
+        if not os.path.exists(xlsx_path):
+            st.error(f"Could not find `{xlsx_path}`. Make sure it's in the correct folder.")
+        else:
+            display_table(xlsx_path, sheet)
+
+    with st.expander("Quebec Subsidies (Used Vehicles)", expanded=False):
+        # Load the Quebec Subsidies (Used Vehicles) data only when opened; cache thereafter
+        xlsx_path = "EV_incentives_sum_edited.xlsx"
+        sheet = "QC_used"
+        if not os.path.exists(xlsx_path):
+            st.error(f"Could not find `{xlsx_path}`. Make sure it's in the correct folder.")
+        else:
+            display_table(xlsx_path, sheet)
 
 if __name__ == "__main__":
     tables()
